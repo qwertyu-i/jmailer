@@ -45,6 +45,11 @@
       <artifactId>simple-java-mail</artifactId>
       <version>8.12.6</version>
     </dependency>
+    <dependency>
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <version>2.5</version>
+    </dependency>
   </dependencies>
 
   <build>
