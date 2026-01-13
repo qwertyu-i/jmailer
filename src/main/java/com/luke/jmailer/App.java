@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import org.yaml.snakeyaml.Yaml;
+// to do: add interactive line oriented mail composition and make reader
 
 /**
  * Hello world!
@@ -13,8 +14,10 @@ public class App {
         String configPath = System.getProperty("user.home") + "/.jmailer.d/config.yaml";
         System.out.println(configPath);
 
-        Sender sender = loadSender(configPath);
-        sender.sendMail("testing", "Testing from JMail V0.0.2", "john.s12312355@gmail.com");
+        // Sender sender = loadSender(configPath);
+        // sender.sendMail("testing", "Testing from JMail V0.0.2", "john.s12312355@gmail.com");
+
+        Reader reader = loadReader(configPath);
 
     }
 
@@ -30,7 +33,6 @@ public class App {
             );
             // by default, if no username specified, set it to email
             config.SMTP.checkUsername();
-            config.IMAP.checkUsername();
 
             // p stands for properties to keep things shorter
             SMTPConfig p = config.SMTP;
@@ -40,6 +42,28 @@ public class App {
             // add config wizard
             System.out.println("config not found");
             return new Sender("a", "a", "a", "a", 2);
+        }
+    }
+
+    public static Reader loadReader(String configPath) {
+        Yaml yaml = new Yaml();
+        try {
+            InputStream inputStream = new FileInputStream(configPath);
+            Config config = yaml.loadAs(
+                inputStream,
+                Config.class
+            );
+            // by default, if no username specified, set it to email
+            config.IMAP.checkUsername();
+
+            // p stands for properties to keep things shorter
+            IMAPConfig p = config.IMAP;
+
+            return new Reader(p.server, p.email, p.username, p.password, p.port);
+        } catch (FileNotFoundException e) {
+            // add config wizard
+            System.out.println("config not found");
+            return new Reader("a", "a", "a", "a", 2);
         }
     }
 

@@ -19,7 +19,6 @@ public class Sender {
     private final String password;
     private final int port;
 
-    // if username is provided
     Sender(String server, String emailAddr, String username, String password, int port) {
         this.server = server;
         this.emailAddr = emailAddr;
@@ -27,7 +26,7 @@ public class Sender {
         this.password = password;
         this.port = port;
 
-        // remember to enable tls if port is 587
+        // add option for tls in config
         this.mailer = MailerBuilder
             .withSMTPServer(this.server, this.port, this.username, this.password)
             .withTransportStrategy(TransportStrategy.SMTP_TLS)
