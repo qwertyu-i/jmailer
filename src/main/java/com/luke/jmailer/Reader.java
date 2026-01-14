@@ -2,12 +2,14 @@ package com.luke.jmailer;
 
 import java.util.Properties;
 
+import jakarta.mail.Address;
 import jakarta.mail.Folder;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
 import jakarta.mail.NoSuchProviderException;
 import jakarta.mail.Session;
 import jakarta.mail.Store;
+import jakarta.mail.internet.InternetAddress;
 
 public class Reader {
     private final String server;
@@ -19,7 +21,7 @@ public class Reader {
     Session session;
     Store store;
     Folder folder;
-    Message[] inbox;
+    public Message[] inbox;
 
     Reader(String server, String emailAddr, String username, String password, int port) {
         this.server = server;
@@ -60,10 +62,24 @@ public class Reader {
 
         try {
             inbox = folder.getMessages();
-            System.out.println(inbox[inbox.length - 1].getSubject());
         } catch (MessagingException e) {
             e.printStackTrace();
         }
 
+    }
+
+    // 0 would be most recent, 1 would be second most, etc
+    public PartMail lightFetch(int n) throws MessagingException {
+        PartMail emailInfo = new PartMail();
+
+        emailInfo.date = inbox[inbox.length - n - 1].getReceivedDate();
+        emailInfo.subject = inbox[inbox.length - n - 1].getSubject();
+        emailInfo.from = (InternetAddress[]) inbox[inbox.length - n - 1].getFrom();
+        return emailInfo;
+    }
+
+    // uses true index, maybe should rethink that in the future idk
+    public Message deepFetch(int i) throws MessagingException {
+        return inbox[i];
     }
 }

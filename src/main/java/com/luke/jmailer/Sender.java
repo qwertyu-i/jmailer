@@ -1,5 +1,7 @@
 package com.luke.jmailer;
 
+import java.util.Scanner;
+
 import org.simplejavamail.api.email.Email;
 import org.simplejavamail.api.mailer.Mailer;
 import org.simplejavamail.api.mailer.config.TransportStrategy;
@@ -33,12 +35,35 @@ public class Sender {
             .buildMailer();
     }
 
-    public void sendMail(String body, String subject, String recipient) {
+    // class that holds information for a sent mail
+    class outMail {
+        public String recipient;
+        public String subject;
+        public String body = "";
+    }
+
+    // read from stdin
+    public outMail composeMail(Scanner scan, String subject, String recipient) {
+        outMail ret = new outMail();
+        ret.subject = subject;
+        ret.recipient = recipient;
+        while (scan.hasNextLine()) {
+            String line = scan.nextLine();
+            if (line.equals(".")) {
+                return ret;
+            } else if (!line.equals(null)) {
+                ret.body += line + "\n";
+            }
+        }
+        return ret;
+    }
+
+    public void sendMail(outMail out) {
         Email email = EmailBuilder.startingBlank()
             .from(username, emailAddr)
-            .to(recipient)
-            .withSubject(subject)
-            .withPlainText(body)
+            .to(out.recipient)
+            .withSubject(out.subject)
+            .withPlainText(out.body)
             .buildEmail();
         mailer.sendMail(email);
     }
