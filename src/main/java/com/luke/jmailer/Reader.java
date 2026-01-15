@@ -80,6 +80,6 @@ public class Reader {
 
     // uses true index, maybe should rethink that in the future idk
     public Message deepFetch(int i) throws MessagingException {
-        return inbox[i];
+        return inbox[inbox.length - i];
     }
 }

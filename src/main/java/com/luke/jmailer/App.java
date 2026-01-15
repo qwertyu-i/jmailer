@@ -2,18 +2,28 @@ package com.luke.jmailer;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Scanner;
 
+import org.simplejavamail.converter.EmailConverter;
 import org.yaml.snakeyaml.Yaml;
 // to do: add interactive line oriented mail composition and make reader
 
+import jakarta.mail.BodyPart;
+import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
+import jakarta.mail.Multipart;
+import jakarta.mail.Part;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
 
 public class App {
 
     public static void main(String[] args) {
+        // probably could have initialised these in a constructor instead of
+        // dumping them in main
         String configPath = System.getProperty("user.home") + "/.jmailer.d/config.yaml";
         // stores the indices of the current 10 messages displayed
         // display messages as 0-9 but the actual index in folder is different
@@ -23,12 +33,15 @@ public class App {
         App app = new App();
         Reader reader = app.loadReader(configPath);
         // uninitialised to load later
-        Sender sender;
+        Sender sender = app.loadSender(configPath);
         Scanner scan = new Scanner(System.in);
         int page = 0;
+        // check if we have changed so we don't keep printing
+        int lastPage = -1;
         boolean quit = false;
         String subject = "";
         String recipient = null;
+        int lastMessage = -1;
 
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("-s")) {
@@ -42,27 +55,69 @@ public class App {
         }
 
         if (recipient != null) {
-            sender = app.loadSender(configPath);
             sender.sendMail(sender.composeMail(scan, subject, recipient));
             return;
         }
 
         while (!quit) {
-            try {
-                messageIndex = app.scrollMail(page, reader);
-            } catch (MessagingException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+            if (page != lastPage) {
+                try {
+                    System.out.println("page: " + page);
+                    messageIndex = app.scrollMail(page, reader);
+                } catch (MessagingException e) {
+                    System.out.println("could not retrieve messages");
+                } catch (Exception InvalidPage) {
+                    System.out.println("invalid page number");
+                }
             }
+            lastPage = page;
             System.out.print("& ");
             String command = scan.next();
             if (command.equals("+p")) {
                 page++;
             } else if (command.equals("-p")) {
                 page--;
+            } else if (command.equals("p")) {
+                    page = scan.nextInt();
             } else if (command.equals("q")) {
                 quit = true;
                 scan.close();
+            } else if (command.matches("[0-9]")) {
+                // move this to a function
+                try {
+                    lastMessage = messageIndex[Integer.valueOf(command)];
+                    Message mail = reader.deepFetch(lastMessage);
+                    System.out.print("From: ");
+                    InternetAddress[] fromAddresses = (InternetAddress[]) mail.getFrom();
+                    for (int i = 0; i < fromAddresses.length; i++) {
+                        System.out.print(fromAddresses[i].getPersonal() + " <" + fromAddresses[i].getAddress() + ">, ");
+
+                    }
+                    System.out.println();
+                    System.out.println("Subject: " + mail.getSubject());
+                    System.out.print("To: ");
+                    InternetAddress[] toAddresses = (InternetAddress[]) mail.getAllRecipients();
+                    for (int i = 0; i < toAddresses.length; i++) {
+                        System.out.print(toAddresses[i].getPersonal() + " <" + toAddresses[i].getAddress() + ">, ");
+
+                    }
+                    System.out.println();
+                    try {
+                        System.out.println(app.getPlainText(mail));
+                    } catch (IOException e) {
+                        System.out.println("could not fetch message contents");
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("command matched regex [0-9] but was not int");
+                } catch (MessagingException e) {
+                    System.out.println("could not fetch message #" + command);
+                }
+            } else if (command.equals("r")) {
+                try {
+                    sender.sendMail(sender.composeMail(scan), EmailConverter.mimeMessageToEmail((MimeMessage) reader.deepFetch(lastMessage)));
+                } catch (MessagingException e) {
+                    System.out.println("could not fetch message #" + command + " while replying");
+                }
             }
         }
     }
@@ -119,11 +174,38 @@ public class App {
             PartMail email = reader.lightFetch(i + (p * 10));
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM");
             String date = dateFormat.format(email.date);
-            System.out.printf("%-2d%-20.18s%-46.46s%12.10s", i, email.from[0].getPersonal(), email.subject, date);
-            System.out.println();
-            messageIndices[i] = i + (p * 10);
+            System.out.printf("%-2d%-20.18s%-46.46s%12.10s\n", i, email.from[0].getPersonal(), email.subject, date);
+            messageIndices[i] = i + (p * 10) + 1;
         }
         return messageIndices;
+    }
+
+    // ai generated method, recursively searches through multi part emails
+    // for plain text
+    public String getPlainText(Part p) throws MessagingException, IOException {
+        // 1. If the part itself is plain text, return it
+        if (p.isMimeType("text/plain")) {
+            return (String) p.getContent();
+        }
+
+        // 2. If it's a multipart, search the parts
+        if (p.isMimeType("multipart/*")) {
+            Multipart mp = (Multipart) p.getContent();
+            for (int i = 0; i < mp.getCount(); i++) {
+                BodyPart bp = mp.getBodyPart(i);
+                String s = getPlainText(bp);
+                if (s != null) {
+                    return s; // Return the first plain text part found
+                }
+            }
+        }
+    
+        // 3. Handle nested messages
+        if (p.isMimeType("message/rfc822")) {
+            return getPlainText((Part) p.getContent());
+        }
+
+        return null;
     }
 
     // make this later
