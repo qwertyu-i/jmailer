@@ -85,6 +85,7 @@ public class App {
         // only load now since if user only used sending they won't reach this
         Reader reader = app.loadReader(configPath);
 
+        System.out.println("JMailer V1.0.0, type ? for help");
         while (!quit) {
             if (page != lastPage) {
                 try {
