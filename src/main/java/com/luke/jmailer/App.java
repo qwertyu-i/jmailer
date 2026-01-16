@@ -155,7 +155,7 @@ public class App {
                 try {
                     Message message = reader.deepFetch(lastMessage);
                     System.out.println("are you sure you want to delete \"" + message.getSubject() + "\"? (yes/no)");
-                    if (scan.next() == "yes")
+                    if (scan.next().equals("yes"))
                         message.setFlag(Flags.Flag.DELETED, true);
                     else
                         System.out.println("operation cancelled");
