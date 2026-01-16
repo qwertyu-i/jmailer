@@ -335,6 +335,10 @@ class SMTPConfig {
     public String password;
     public boolean tls = false;
 
+    /* sets username to email if not provided
+     * @PRE: username is not set, but email is
+     * @POST: sets username to email
+     */
     public void checkUsername() {
         if (this.username == null) {
             this.username = this.email;
@@ -349,6 +353,11 @@ class IMAPConfig {
     public String username;
     public String password;
     public boolean tls = false;
+
+    /* sets username to email if not provided
+     * @PRE: username is not set, but email is
+     * @POST: sets username to email
+     */
     public void checkUsername() {
         if (this.username == null) {
             this.username = this.email;

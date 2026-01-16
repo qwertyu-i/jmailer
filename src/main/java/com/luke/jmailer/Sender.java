@@ -47,7 +47,12 @@ public class Sender {
         public String recipient;
         public String subject;
         public String body = "";
-        // needed for rendering on gmail and such
+
+        /* method to replicate plaintext to html because gmail and other
+         * modern clients like to only read html
+         * @PRE: body exists
+         * @POST: returns body parsed to be in HTML to be prepended to replies
+         */
         public String HTMLBody() {
             if (body == null) return "";
     
