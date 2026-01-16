@@ -21,17 +21,21 @@ public class Sender {
     private final String password;
     private final int port;
 
-    Sender(String server, String emailAddr, String username, String password, int port) {
+    Sender(String server, String emailAddr, String username, String password, int port, boolean tls) {
         this.server = server;
         this.emailAddr = emailAddr;
         this.username = username;
         this.password = password;
         this.port = port;
+        TransportStrategy strategy = TransportStrategy.SMTP;
+        if (tls) {
+            strategy = TransportStrategy.SMTP_TLS;
+        }
 
         // add option for tls in config
         this.mailer = MailerBuilder
             .withSMTPServer(this.server, this.port, this.username, this.password)
-            .withTransportStrategy(TransportStrategy.SMTP_TLS)
+            .withTransportStrategy(strategy)
             .buildMailer();
     }
 
@@ -65,7 +69,6 @@ public class Sender {
         outMail ret = new outMail();
         ret.subject = subject;
         // throws out first thing which is usually a new line
-        scan.nextLine();
         ret.recipient = recipient;
         while (scan.hasNextLine()) {
             String line = scan.nextLine();
@@ -79,6 +82,7 @@ public class Sender {
 
     // shorter code in app for reply command
     public outMail composeMail(Scanner scan) {
+        scan.nextLine();
         return composeMail(scan, null, null);
     }
 
