@@ -8,8 +8,11 @@ import org.simplejavamail.api.mailer.config.TransportStrategy;
 import org.simplejavamail.email.EmailBuilder;
 import org.simplejavamail.mailer.MailerBuilder;
 
-/* Acts as the class that sends emails, email bodies are composed from 
- * the main App class.
+/* Acts as the class that sends emails, being a wrapper for Simple Java Mail
+ * to autofill some info
+ * @Author Luke
+ * @Date Jan 4 2026
+ * @Version 1.0.0
  */
 
 // mailer wrapper that autofills information on emails
@@ -64,7 +67,12 @@ public class Sender {
         }
     }
 
-    // read from stdin
+    /* Interactive mail composition mode
+     * @PRE: A scanner to read the body, string of subject, and string of
+     * recipient address are provided
+     * @POST: Returns an object of class outMail containing the subject,
+     * recipient, and body
+     */
     public outMail composeMail(Scanner scan, String subject, String recipient) {
         outMail ret = new outMail();
         ret.subject = subject;
@@ -80,12 +88,23 @@ public class Sender {
         return ret;
     }
 
-    // shorter code in app for reply command
+    /* A version of composeMail for replying to emails where subject and
+     * recipient are already provided
+     * @PRE: A scanner is provided for reading the body of the email
+     * @POST: Returns an object of class outMail containing only a body,
+     * subject and recipient are null
+     */
     public outMail composeMail(Scanner scan) {
         scan.nextLine();
         return composeMail(scan, null, null);
     }
 
+    /* Autofills from address, and reads information from an outMail object
+     * to create an email to send
+     * @PRE: An outMail object is provided with recipient, subject, and body
+     * and mailer has been built
+     * @POST: Sends the email to the SMTP server
+     */
     public void sendMail(outMail out) {
         Email email = EmailBuilder.startingBlank()
             .from(username, emailAddr)
@@ -96,7 +115,12 @@ public class Sender {
         mailer.sendMail(email);
     }
 
-    // for replying
+    /* Autofills from address, and reads information from an outMail object
+     * to create an email to send for replying
+     * @PRE: An outMail object is provided with the body, and the Email object
+     * for the email that is being replied to is provided as well
+     * @POST: Sends the email to the SMTP server
+     */
     public void sendMail(outMail out, Email inRepTo) {
         Email email = EmailBuilder.replyingTo(inRepTo)
             .from(username, emailAddr)
@@ -105,11 +129,4 @@ public class Sender {
             .buildEmail();
         mailer.sendMail(email);
     }
-
-
-    // UNUSED CODE
-    // if no username is specified (check is done in function call)
-    //Sender(String server, String emailAddr, String password, int port) {
-    //    this(server, emailAddr, emailAddr, password, port);
-    //}
 }

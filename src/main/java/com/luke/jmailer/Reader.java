@@ -2,7 +2,6 @@ package com.luke.jmailer;
 
 import java.util.Properties;
 
-import jakarta.mail.Address;
 import jakarta.mail.Folder;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
@@ -11,12 +10,13 @@ import jakarta.mail.Session;
 import jakarta.mail.Store;
 import jakarta.mail.internet.InternetAddress;
 
+/* The class that fetches emails and sets up the IMAP client
+ * @Author Luke
+ * @Date Jan 5 2026
+ * @Version 1.0.0
+ */
+
 public class Reader {
-    private final String server;
-    private final String emailAddr;
-    private final String username;
-    private final String password;
-    private final int port;
     Properties serverProps;
     Session session;
     Store store;
@@ -24,12 +24,6 @@ public class Reader {
     public Message[] inbox;
 
     Reader(String server, String emailAddr, String username, String password, int port, boolean tls) {
-        this.server = server;
-        this.emailAddr = emailAddr;
-        this.username = username;
-        this.password = password;
-        this.port = port;
-
         serverProps = new Properties();
         serverProps.put("mail.imaps.host", server);
         serverProps.put("mail.imaps.ssl.trust", server);
@@ -54,7 +48,7 @@ public class Reader {
 
         try {
             folder = store.getFolder("INBOX");
-            folder.open(Folder.READ_ONLY);
+            folder.open(Folder.READ_WRITE);
         } catch (MessagingException e) {
             System.out.println("could not open default folder");
             e.printStackTrace();
@@ -68,7 +62,11 @@ public class Reader {
 
     }
 
-    // 0 would be most recent, 1 would be second most, etc
+    /* Gets the subject, date, and from address of the nth (starting from 0)
+     * most recent email
+     * @PRE: Integer n is provided as arg
+     * @POST: Returns a PartMail object containing the subject, date, and from
+     */
     public PartMail lightFetch(int n) throws MessagingException {
         PartMail emailInfo = new PartMail();
 
@@ -78,7 +76,10 @@ public class Reader {
         return emailInfo;
     }
 
-    // uses true index, maybe should rethink that in the future idk
+    /* Gets the entire message of the nth (starting from 1) most recent email
+     * @PRE: Integer n is provided as arg
+     * @POST: returns entire message of the nth email
+     */
     public Message deepFetch(int i) throws MessagingException {
         return inbox[inbox.length - i];
     }
