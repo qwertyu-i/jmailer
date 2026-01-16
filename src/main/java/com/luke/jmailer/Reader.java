@@ -23,7 +23,7 @@ public class Reader {
     Folder folder;
     public Message[] inbox;
 
-    Reader(String server, String emailAddr, String username, String password, int port) {
+    Reader(String server, String emailAddr, String username, String password, int port, boolean tls) {
         this.server = server;
         this.emailAddr = emailAddr;
         this.username = username;
@@ -34,7 +34,7 @@ public class Reader {
         serverProps.put("mail.imaps.host", server);
         serverProps.put("mail.imaps.ssl.trust", server);
         serverProps.put("mail.imaps.port", port);
-        serverProps.put("mail.imaps.starttls", true);
+        serverProps.put("mail.imaps.starttls", tls);
         serverProps.put("mail.imaps.connectiontimeout", 10000);
         serverProps.put("mail.maps.timeout", 10000);
 

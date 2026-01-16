@@ -182,7 +182,7 @@ public class App {
             // p stands for properties to keep things shorter
             IMAPConfig p = config.IMAP;
 
-            return new Reader(p.server, p.email, p.username, p.password, p.port);
+            return new Reader(p.server, p.email, p.username, p.password, p.port, p.tls);
         } catch (FileNotFoundException e) {
             throw new RuntimeException("no configuration file found at ~/.jmailer.d/config.yaml");
         }
@@ -289,6 +289,7 @@ class IMAPConfig {
     public String email;
     public String username;
     public String password;
+    public boolean tls = false;
     public void checkUsername() {
         if (this.username == null) {
             this.username = this.email;
