@@ -20,7 +20,8 @@ import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 
 /* Main App class of JMailer, handles UI and creation of both Sender and Reader
- * classes
+ * classes, latest version should have a proper-ish guide in the README:
+ * https://github.com/qwertyu-i/jmailer
  * @Author Luke
  * @Date Jan 4 2026
  * @Version 1.0.0
