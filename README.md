@@ -1,4 +1,5 @@
 # JMailer
+CLI email client similar to UNIX mail, but not the same.<br />
 Packaged as an uber jar when using:
 ```bash
 mvn clean package
