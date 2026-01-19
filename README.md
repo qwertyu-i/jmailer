@@ -1,6 +1,8 @@
 # JMailer
-Packaged as an uber jar when using:<br />
-mvn clean install
+Packaged as an uber jar when using:
+```bash
+mvn clean package
+```
 
 # Configuration
 JMailer is configured through a YAML file located at ~/.jmailer.d/config.yaml. <br />
